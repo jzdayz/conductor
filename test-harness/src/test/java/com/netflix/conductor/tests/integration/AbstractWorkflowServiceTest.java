@@ -148,6 +148,8 @@ public abstract class AbstractWorkflowServiceTest {
 
     private ObjectMapper objectMapper = new JsonMapperProvider().get();
 
+    SubWorkflow dummySubWorkflowSystemTask = new SubWorkflow(objectMapper);
+
     private static boolean registered;
 
     private static List<TaskDef> taskDefs;
@@ -1161,9 +1163,8 @@ public abstract class AbstractWorkflowServiceTest {
         Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
 
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
         String subWorkflowTaskId = workflow.getTaskByRefName("sw1").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(wfid, true);
 
@@ -1179,7 +1180,7 @@ public abstract class AbstractWorkflowServiceTest {
         }
 
         // Execute again to complete the Subworkflow task.
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(wfid, true);
         assertNotNull(workflow);
@@ -2286,11 +2287,10 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals("found " + workflow.getTasks().stream().map(Task::toString).collect(Collectors.toList()), 4, workflow.getTasks().size());
 
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
         String subWorkflowTaskId1 = workflow.getTaskByRefName("st1").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId1, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId1, 1);
         String subWorkflowTaskId2 = workflow.getTaskByRefName("st2").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId2, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId2, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
 
@@ -2330,7 +2330,7 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(RUNNING, subWorkflow2.getStatus());
 
         // Execute again to re-evaluate the Subworkflow task.
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId1, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId1, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
         assertNotNull(workflow);
@@ -2362,7 +2362,7 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(WorkflowStatus.FAILED, subWorkflow2.getStatus());
 
         // Execute again to re-evaluate the Subworkflow task.
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId2, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId2, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
         assertNotNull(workflow);
@@ -2594,10 +2594,9 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(RUNNING, workflow.getStatus());
         assertEquals(1, workflow.getTasks().size());
 
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskIdLevel1 = workflow.getTaskByRefName("junit_sw_level_1_task").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskIdLevel1, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskIdLevel1, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
 
@@ -2608,7 +2607,7 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(1, level1SubWorkflow.getTasks().size());
 
         String subWorkflowTaskIdLevel2 = level1SubWorkflow.getTaskByRefName("junit_sw_level_2_task").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskIdLevel2, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskIdLevel2, 1);
 
         level1SubWorkflow = workflowExecutionService.getExecutionStatus(level1SubWorkflowId, true);
 
@@ -2619,7 +2618,7 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(1, level2SubWorkflow.getTasks().size());
 
         String subWorkflowTaskIdLevel3 = level2SubWorkflow.getTaskByRefName("junit_sw_level_3_task").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskIdLevel3, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskIdLevel3, 1);
 
         level2SubWorkflow = workflowExecutionService.getExecutionStatus(level2SubWorkflowId, true);
 
@@ -2829,8 +2828,7 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(2, subWorkflow.getTasks().size());
 
         // Execute again to re-evaluate the Subworkflow task.
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflow.getParentWorkflowTaskId(), 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflow.getParentWorkflowTaskId(), 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
         assertNotNull(workflow);
@@ -2906,10 +2904,9 @@ public abstract class AbstractWorkflowServiceTest {
         assertNotNull(workflow);
         assertEquals(RUNNING, workflow.getStatus());
 
-        SubWorkflow subWorkflow = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskId = workflow.getTaskByRefName("sw1").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflow, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         task = workflowExecutionService.poll("junit_task_1", "task1.junit.worker");
         assertNotNull(task);
@@ -2934,7 +2931,7 @@ public abstract class AbstractWorkflowServiceTest {
         workflowExecutionService.updateTask(task);
 
         // Execute again to re-evaluate the Subworkflow task.
-        workflowExecutor.executeSystemTask(subWorkflow, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
         assertNotNull(workflow);
@@ -3038,10 +3035,9 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(RUNNING, workflow.getStatus());
         assertEquals(2, workflow.getTasks().size());
 
-        SubWorkflow subWorkflow = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskId = workflow.getTaskByRefName("sw1").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflow, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         task = workflowExecutionService.poll("junit_task_1", "task1.junit.worker");
         assertNull(task);
@@ -3072,7 +3068,7 @@ public abstract class AbstractWorkflowServiceTest {
         workflowExecutionService.updateTask(task);
 
         // Execute again to re-evaluate the Subworkflow task.
-        workflowExecutor.executeSystemTask(subWorkflow, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
         assertNotNull(workflow);
@@ -4783,10 +4779,9 @@ public abstract class AbstractWorkflowServiceTest {
         assertNotNull(workflow);
         assertNotNull(workflow.getTasks());
 
-        SubWorkflow subWorkflow = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskId = workflow.getTaskByRefName("a2").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflow, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
         Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
 
         workflow = workflowExecutionService.getExecutionStatus(wfId, true);
@@ -4822,6 +4817,7 @@ public abstract class AbstractWorkflowServiceTest {
         workflow = workflowExecutionService.getExecutionStatus(subWorkflowId, true);
         assertNotNull(workflow);
         assertEquals(WorkflowStatus.COMPLETED, workflow.getStatus());
+        assertEquals(LINEAR_WORKFLOW_T1_T2, workflow.getWorkflowName());
         assertNotNull(workflow.getOutput());
         assertTrue(workflow.getOutput().containsKey("o1"));
         assertTrue(workflow.getOutput().containsKey("o2"));
@@ -4829,7 +4825,7 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(uuid, workflow.getOutput().get("o2"));
 
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
-        workflowExecutor.executeSystemTask(subWorkflow, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         subWorkflowTask = workflowExecutionService.poll("junit_task_6", "test");
         assertNotNull(subWorkflowTask);
@@ -4871,10 +4867,9 @@ public abstract class AbstractWorkflowServiceTest {
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
 
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskId = workflow.getTaskByRefName("a2").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
         assertNotNull(workflow);
@@ -4938,10 +4933,9 @@ public abstract class AbstractWorkflowServiceTest {
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
 
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskId = workflow.getTaskByRefName("a2").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
         assertNotNull(workflow);
@@ -5009,10 +5003,9 @@ public abstract class AbstractWorkflowServiceTest {
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
 
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskId = workflow.getTaskByRefName("a2").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
         assertNotNull(workflow);
@@ -5796,10 +5789,9 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(INPUT_PAYLOAD_PATH, workflow.getTasks().get(1).getExternalInputPayloadStoragePath());
         assertEquals(SUB_WORKFLOW.name(), workflow.getTasks().get(1).getTaskType());
 
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskId = workflow.getTaskByRefName("swt").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         // Polling for the task within the sub_workflow
         task = workflowExecutionService.poll("junit_task_3", "task3.junit.worker");
@@ -5827,7 +5819,7 @@ public abstract class AbstractWorkflowServiceTest {
         workflowExecutionService.updateTask(task);
 
         // Execute again to re-evaluate the Subworkflow task.
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         // check the sub workflow
         subWorkflow = workflowExecutionService.getExecutionStatus(subWorkflowId, true);
@@ -6295,10 +6287,9 @@ public abstract class AbstractWorkflowServiceTest {
         assertNotNull(workflow);
         assertNotNull(workflow.getTasks());
 
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskId = workflow.getTaskByRefName("a2").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
 
@@ -6339,7 +6330,7 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(taskToDomain, subWorkflow.getTaskToDomain());
 
         // Execute again to re-evaluate the Subworkflow task.
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         task = workflowExecutionService.poll("junit_task_6", "test");
         assertNotNull(task);
@@ -6378,10 +6369,9 @@ public abstract class AbstractWorkflowServiceTest {
         assertNotNull(workflow);
         assertNotNull(workflow.getTasks());
 
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskId = workflow.getTaskByRefName("a2").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
 
@@ -6422,7 +6412,7 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(taskToDomain, subWorkflow.getTaskToDomain());
 
         // Execute again to re-evaluate the Subworkflow task.
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         task = workflowExecutionService.poll("junit_task_6", "test");
         assertNotNull(task);
@@ -7003,10 +6993,9 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(RUNNING, workflow.getStatus());
         assertEquals(2, workflow.getTasks().size());
 
-        SubWorkflow subWorkflowSystemTask = new SubWorkflow();
         // Simulating SystemTaskWorkerCoordinator to execute async system tasks
         String subWorkflowTaskId = workflow.getTaskByRefName("sw1").getTaskId();
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
 
@@ -7058,7 +7047,7 @@ public abstract class AbstractWorkflowServiceTest {
         assertEquals(2, subWorkflow.getTasks().size());
 
         // Execute again to re-evaluate the Subworkflow task.
-        workflowExecutor.executeSystemTask(subWorkflowSystemTask, subWorkflowTaskId, 1);
+        workflowExecutor.executeSystemTask(dummySubWorkflowSystemTask, subWorkflowTaskId, 1);
 
         workflow = workflowExecutionService.getExecutionStatus(workflowId, true);
         assertNotNull(workflow);
